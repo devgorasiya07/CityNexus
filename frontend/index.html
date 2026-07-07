@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityNexus - Urban Infrastructure Simulator</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <!-- Fullscreen Canvas for Graph Drawing -->
+    <canvas id="cityCanvas"></canvas>
+
+    <!-- Glassmorphism Dashboard Overlay -->
+    <div class="dashboard">
+        <div class="dashboard-header">
+            <h1><i class="fa-solid fa-city"></i> CityNexus</h1>
+            <p>Urban Infrastructure Visualization Engine</p>
+        </div>
+
+        <div class="dashboard-section">
+            <h2>1. Generate City Grid</h2>
+            <div class="control-group">
+                <label for="nodeCountVal">Intersections (Nodes)</label>
+                <input type="number" id="nodeCountVal" class="text-input" value="1000" min="10" max="10000">
+            </div>
+            <div class="control-group">
+                <label for="edgeCountVal">Roads (Edges)</label>
+                <input type="number" id="edgeCountVal" class="text-input" value="500" min="10" max="300000">
+            </div>
+            <div class="button-row">
+                <button id="btnGenerateGrid" class="btn primary"><i class="fa-solid fa-border-all"></i> Grid Layout</button>
+                <button id="btnGenerateRandom" class="btn secondary"><i class="fa-solid fa-shuffle"></i> Random Sprawl</button>
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <h2>2. Navigation & Routing</h2>
+            <p class="hint">Click nodes on the map, or manually type their IDs below.</p>
+            <div class="control-group">
+                <label for="srcNodeInput">Start Intersection ID</label>
+                <input type="number" id="srcNodeInput" class="text-input" placeholder="e.g. 0" min="0">
+            </div>
+            <div class="control-group">
+                <label for="tgtNodeInput">Target Intersection ID</label>
+                <input type="number" id="tgtNodeInput" class="text-input" placeholder="e.g. 10" min="0">
+            </div>
+            <div class="button-row">
+                <button id="btnPickRandom" class="btn outline"><i class="fa-solid fa-location-crosshairs"></i> Random Endpoints</button>
+            </div>
+            <div class="button-row mt-2">
+                <button id="btnRunDijkstra" class="btn accent dijkstra"><i class="fa-solid fa-route"></i> Run Dijkstra</button>
+                <button id="btnRunAStar" class="btn accent astar"><i class="fa-solid fa-star"></i> Run A* Search</button>
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <h2>3. Emergency Services</h2>
+            <p class="hint">Deploy hospitals intelligently to minimize city-wide ambulance response times.</p>
+            <div class="control-group">
+                <label for="hospitalCount">Hospitals to Deploy</label>
+                <input type="number" id="hospitalCount" class="text-input" value="3" min="1" max="50000">
+            </div>
+            <div class="button-row">
+                <button id="btnPlaceFacilities" class="btn warning"><i class="fa-solid fa-hospital"></i> Optimize Placement</button>
+            </div>
+
+            <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
+            <p class="hint">Analyze Ambulance Reachability Dead-Zones.</p>
+            
+            <div class="control-group">
+                <label for="ambulanceStartNode">Start Node ID</label>
+                <input type="number" id="ambulanceStartNode" class="text-input" value="0" min="0">
+            </div>
+            <div class="control-group">
+                <label for="ambulanceTimeLimit">Time Limit (min)</label>
+                <input type="number" id="ambulanceTimeLimit" class="text-input" value="10" min="1">
+            </div>
+            <div class="control-group">
+                <label for="ambulanceSpeed">Speed (units/min)</label>
+                <input type="number" id="ambulanceSpeed" class="text-input" value="60" min="1">
+            </div>
+
+            <div class="button-row mt-2">
+                <button id="btnIsochrone" class="btn accent dijkstra"><i class="fa-solid fa-truck-medical"></i> Analyze Reachability</button>
+                <button id="btnClear" class="btn danger"><i class="fa-solid fa-trash-can"></i> Clear Map</button>
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <h2>4. Network Design</h2>
+            <p class="hint">Calculate the most cost-effective way to lay fiber-optic cables to connect every intersection.</p>
+            <div class="button-row">
+                <button id="btnRunMST" class="btn outline" style="color: #feca57; border-color: rgba(254, 202, 87, 0.5);"><i class="fa-solid fa-network-wired"></i> Build Fiber Network (MST)</button>
+            </div>
+        </div>
+
+        <div class="stats-panel">
+            <div class="stat-box">
+                <span class="stat-label">Nodes Explored</span>
+                <span class="stat-value" id="statExplored">0</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Path Length</span>
+                <span class="stat-value" id="statLength">0</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Time (ms)</span>
+                <span class="stat-value" id="statTime">0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Algorithm Legend -->
+    <div class="legend">
+        <div class="legend-item"><span class="color-box unvisited"></span> Unexplored Road</div>
+        <div class="legend-item"><span class="color-box exploring"></span> Currently Scanning</div>
+        <div class="legend-item"><span class="color-box visited"></span> Visited Area</div>
+        <div class="legend-item"><span class="color-box path"></span> Shortest Path</div>
+        <div class="legend-item"><span class="color-box facility"></span> Hospital / Facility</div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
