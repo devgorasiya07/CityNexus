@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityNexus — Smart City Infrastructure Engine</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <!-- Fullscreen Canvas for Graph Drawing -->
+    <canvas id="cityCanvas"></canvas>
+
+    <!-- Dashboard Sidebar -->
+    <div class="dashboard">
+        <!-- Logo -->
+        <div class="dashboard-header">
+            <div class="logo-row">
+                <div class="logo-icon"><i class="fa-solid fa-city"></i></div>
+                <div>
+                    <h1>CityNexus</h1>
+                    <p class="tagline">Smart City Infrastructure Engine</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scrollable Content -->
+        <div class="dashboard-scroll">
+
+            <!-- Section 1: City Generation -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <span class="section-number">01</span>
+                    <h2>Urban Topology</h2>
+                </div>
+                <p class="hint">Generate a random city or build a custom graph manually.</p>
+                <div class="input-grid">
+                    <div class="control-group">
+                        <label for="nodeCountVal">Intersections</label>
+                        <input type="number" id="nodeCountVal" class="text-input" value="1000" min="3" max="10000">
+                    </div>
+                    <div class="control-group">
+                        <label for="edgeCountVal">Roads</label>
+                        <input type="number" id="edgeCountVal" class="text-input" value="500" min="1" max="300000">
+                    </div>
+                </div>
+                <button id="btnGenerateRandom" class="btn primary full-width"><i class="fa-solid fa-shuffle"></i> Generate Random City</button>
+
+                <div class="divider"></div>
+
+                <div class="sub-section">
+                    <span class="sub-label"><i class="fa-solid fa-keyboard"></i> Manual Graph Input</span>
+                    <p class="hint">One edge per line: <code style="color: var(--cyan); font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;">u v w</code></p>
+                    <textarea id="manualEdgeInput" class="text-input" rows="5" placeholder="0 1 50&#10;1 2 30&#10;2 3 80&#10;0 3 120" style="width: 100%; resize: vertical; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;"></textarea>
+                    <button id="btnLoadManual" class="btn primary full-width mt-2"><i class="fa-solid fa-upload"></i> Load Custom Graph</button>
+                </div>
+            </div>
+
+            <!-- Section 2: Routing -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <span class="section-number">02</span>
+                    <h2>Traffic & Routing</h2>
+                </div>
+                <p class="hint">Simulate real-time vehicle navigation through dynamic city traffic.</p>
+                <div class="input-grid">
+                    <div class="control-group">
+                        <label for="srcNodeInput">Origin ID</label>
+                        <input type="number" id="srcNodeInput" class="text-input" placeholder="0" min="0">
+                    </div>
+                    <div class="control-group">
+                        <label for="tgtNodeInput">Destination ID</label>
+                        <input type="number" id="tgtNodeInput" class="text-input" placeholder="10" min="0">
+                    </div>
+                </div>
+                <button id="btnPickRandom" class="btn outline full-width"><i class="fa-solid fa-location-crosshairs"></i> Randomize Endpoints</button>
+                <div class="button-row mt-2">
+                    <button id="btnRunDijkstra" class="btn algo-dijkstra"><i class="fa-solid fa-route"></i> Dijkstra</button>
+                    <button id="btnRunAStar" class="btn algo-astar"><i class="fa-solid fa-star"></i> A* Search</button>
+                </div>
+                <button id="btnCompare" class="btn primary full-width mt-2"><i class="fa-solid fa-scale-balanced"></i> Compare Dijkstra vs A*</button>
+            </div>
+
+            <!-- Section 3: Emergency Response -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <span class="section-number">03</span>
+                    <h2>Emergency Response</h2>
+                </div>
+                <p class="hint">Optimize hospital placement & analyze ambulance coverage zones.</p>
+                
+                <div class="sub-section">
+                    <span class="sub-label"><i class="fa-solid fa-hospital"></i> Facility Placement</span>
+                    <div class="control-group">
+                        <label for="hospitalCount">Hospitals</label>
+                        <input type="number" id="hospitalCount" class="text-input" value="3" min="1" max="50000">
+                    </div>
+                    <button id="btnPlaceFacilities" class="btn success full-width"><i class="fa-solid fa-map-pin"></i> Optimize Placement</button>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="sub-section">
+                    <span class="sub-label"><i class="fa-solid fa-truck-medical"></i> Reachability Analysis</span>
+                    <div class="input-grid three-col">
+                        <div class="control-group compact">
+                            <label for="ambulanceStartNode">Node</label>
+                            <input type="number" id="ambulanceStartNode" class="text-input" value="0" min="0">
+                        </div>
+                        <div class="control-group compact">
+                            <label for="ambulanceTimeLimit">Time</label>
+                            <input type="number" id="ambulanceTimeLimit" class="text-input" value="10" min="1">
+                        </div>
+                        <div class="control-group compact">
+                            <label for="ambulanceSpeed">Speed</label>
+                            <input type="number" id="ambulanceSpeed" class="text-input" value="60" min="1">
+                        </div>
+                    </div>
+                    <div class="button-row">
+                        <button id="btnIsochrone" class="btn algo-dijkstra"><i class="fa-solid fa-satellite-dish"></i> Analyze</button>
+                        <button id="btnClear" class="btn outline"><i class="fa-solid fa-trash-can"></i> Clear</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Multi-Stop Logistics -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <span class="section-number">04</span>
+                    <h2>Multi-Stop Delivery</h2>
+                </div>
+                <p class="hint">Simulate a delivery truck visiting multiple drop-off points via TSP nearest-neighbor.</p>
+                <div class="control-group">
+                    <label for="waypointInput">Waypoint IDs (comma separated)</label>
+                    <input type="text" id="waypointInput" class="text-input" placeholder="e.g. 5, 20, 45, 80" style="width: 100%;">
+                </div>
+                <button id="btnRandomWaypoints" class="btn outline full-width mt-2"><i class="fa-solid fa-dice"></i> Random 5 Waypoints</button>
+                <button id="btnDeliveryRoute" class="btn success full-width mt-2"><i class="fa-solid fa-truck-fast"></i> Compute Delivery Route</button>
+            </div>
+
+            <!-- Section 5: Infrastructure -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <span class="section-number">05</span>
+                    <h2>Infrastructure Cost</h2>
+                </div>
+                <p class="hint">Calculate minimum-cost network using Kruskal's MST.</p>
+                <button id="btnRunMST" class="btn mst full-width"><i class="fa-solid fa-network-wired"></i> Build Fiber Network (MST)</button>
+            </div>
+
+        </div>
+
+        <!-- Stats Panel (always visible at bottom) -->
+        <div class="stats-panel">
+            <div class="stat-box">
+                <span class="stat-value" id="statExplored">—</span>
+                <span class="stat-label">Nodes Explored</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-value highlight-yellow" id="statLength">—</span>
+                <span class="stat-label">Path Cost</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-value highlight-green" id="statTime">—</span>
+                <span class="stat-label">Time (ms)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Algorithm Comparison Overlay -->
+    <div id="compareOverlay" class="compare-overlay" style="display: none;">
+        <div class="compare-card">
+            <div class="compare-header">
+                <h3><i class="fa-solid fa-scale-balanced"></i> Algorithm Comparison</h3>
+                <button id="btnCloseCompare" class="compare-close">&times;</button>
+            </div>
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th class="col-dijkstra">Dijkstra</th>
+                        <th class="col-astar">A* Search</th>
+                        <th>Winner</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Nodes Explored</td>
+                        <td id="cmpDijkstraExplored">—</td>
+                        <td id="cmpAstarExplored">—</td>
+                        <td id="cmpWinnerExplored">—</td>
+                    </tr>
+                    <tr>
+                        <td>Path Cost</td>
+                        <td id="cmpDijkstraCost">—</td>
+                        <td id="cmpAstarCost">—</td>
+                        <td id="cmpWinnerCost">—</td>
+                    </tr>
+                    <tr>
+                        <td>Compute Time</td>
+                        <td id="cmpDijkstraTime">—</td>
+                        <td id="cmpAstarTime">—</td>
+                        <td id="cmpWinnerTime">—</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="compare-verdict" id="cmpVerdict"></p>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+        <div class="legend-item"><span class="color-dot unvisited"></span> Roads</div>
+        <div class="legend-item"><span class="color-dot exploring"></span> Scanning</div>
+        <div class="legend-item"><span class="color-dot visited"></span> Explored</div>
+        <div class="legend-item"><span class="color-dot path"></span> Shortest Path</div>
+        <div class="legend-item"><span class="color-dot facility"></span> Hospital</div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
